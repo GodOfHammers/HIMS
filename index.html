@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title> HIMS Login </title>
+    <link rel="stylesheet" href="hims.css" type="text/css">
+    <meta charset="UTF-8" name="viewport" content="width=device-width,initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Fjalla One" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/fontawesome-free-5.12.1-web/css/all.css">
+
+    <script>
+        function clearScreen() {
+            document.getElementById("name").value = "";
+            document.getElementById("password").value = "";
+        }
+    </script>
+
+</head>
+
+<body style="font-family: Fjalla One;">
+
+    <h1> Hospital Inventory Management System </h1>
+
+    <br>
+    <br>
+    <br>
+
+    <div class="topnav">
+        <a href="index.html" class="title_links active"> Login </a>
+        <div class="dropdown">
+            <button class="dropbtn">User
+              <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <label for="User-Create"> Create User </label>
+                <label for="User-Delete"> Delete User </label>
+                <label for="Password-Modify"> Change Password </label>
+                <label for="index.html"> Logout </label>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">Pharma
+              <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <label for="Pharma-Create"> Create Pharma </label>
+                <label for="Pharma-Modify"> Modify Pharma </label>
+                <label for="Pharma-Delete"> Delete Pharma </label>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">Item
+              <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <label for="Item-Create"> Create Item </label>
+                <label for="Item-Modify"> Modify Item </label>
+                <label for="Item-Delete"> Delete Item </label>
+            </div>
+        </div>
+
+        <label for="Sale-of-Items"> Sale of Items </label>
+
+        <div class="dropdown">
+            <button class="dropbtn">Indent
+              <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <label for="Indent-Create"> Create Indent </label>
+                <label for="Indent-Approve"> Approve Indent </label>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="Login.php" class="form_1">
+        <h3> Login </h3>
+        <label for="name" class="required"> Username: </label>
+        <input type="text" id="name" name="name" placeholder="Enter username" required><br/>
+
+        <label for="password" class="required"> Password: </label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required><br/>
+
+        <button type="reset" id="reset_1" onclick="clearScreen();"> Cancel </button>
+        <button type="submit" id="submit_1"> Submit </button> &nbsp;&nbsp;&nbsp;
+        <a href="index.html" onclick="alert('Mail sent to admin');" id="forgotpwd"> Forgot Password? </a>
+    </form>
+
+    <footer>
+        <ul>
+            <li><a href="#"><i class="fab fa-facebook-f" aria-hidden="true"> </i> </a> </li>
+            <li><a href="#"><i class="fab fa-twitter" aria hidden="true"> </i> </a> </li>
+            <li><a href="#"><i class="fab fa-instagram" aria-hidden="true"> </i> </a></li>
+            <li><a href="#"><i class="fab fa-linkedin-in" aria-hidden="true"> </i> </a></li>
+        </ul>
+    </footer>
+
+</body>
+
+</html>

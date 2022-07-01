@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title> HIMS : Sale of Items </title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fjalla One">
+    <link rel="stylesheet" type="text/css" href="/fontawesome-free-5.12.1-web/css/all.css">
+
+    <script language="javascript">
+        var currentRow;
+
+        function addRow(tableID) {
+            var table = document.getElementById(tableID);
+            var rowCount = table.rows.length;
+
+            // If item name is not selected in last row, then do not allow to add more rows. 
+            var sObject;
+            if (rowCount == 2) {
+                // First row in the table is added through HTML & PHP code in the bottom of this file. In that case, 
+                // there are total 7 children nodes and the "select" element is 4th one; So, choose childNodes[3]
+                sObject = table.rows[rowCount - 1].cells[1].childNodes[1];
+            } else {
+                // If the "select" element is added in Javascript code, there are total 2 children nodes and "select" element is 1st one.
+                // So choose childNodes[0]
+                sObject = table.rows[rowCount - 1].cells[1].childNodes[0];
+            }
+
+            var sName = sObject.options[sObject.selectedIndex].value;
+            if (sName.startsWith("-Select Item-")) {
+                alert('Please select any item in the dropdown box');
+                sObject.focus();
+                return -1;
+            }
+            var row = table.insertRow(rowCount);
+
+            var cell1 = row.insertCell(0);
+            var element1 = document.createElement("input");
+            element1.type = "checkbox";
+            element1.name = "chkbox[]";
+            cell1.appendChild(element1);
+
+            var cell2 = row.insertCell(1);
+
+            var selectElement = document.createElement("select");
+            selectElement.name = "itemName_" + (rowCount - 1);
+            selectElement.onchange = function() {
+                itemSelection(this)
+            };
+            var firstSelectItem = document.getElementById("itemlist_1");
+            var itemCount = firstSelectItem.options.length;
+            //alert("Number of elements in first select box = " + itemCount);
+
+            var i;
+            for (i = 0; i < itemCount; i++) {
+                optionElement = document.createElement("option");
+                optionElement.value = firstSelectItem.options[i].value;
+                optionElement.textContent = firstSelectItem.options[i].text;
+                selectElement.appendChild(optionElement);
+            }
+            cell2.appendChild(selectElement);
+
+            var element21 = document.createElement("img");
+            element21.src = "Search.jpg";
+            element21.alt = "Search";
+            element21.onclick = function() {
+                search(this)
+            };
+            element21.height = "20";
+            element21.width = "42";
+            cell2.appendChild(element21);
+
+            var cell3 = row.insertCell(2);
+            var element3 = document.createElement("input");
+            element3.type = "text";
+            element3.name = "company_" + (rowCount - 1);
+            element3.id = "company";
+            element3.size = 30;
+            element3.readOnly = true;
+            cell3.appendChild(element3);
+
+            var cell4 = row.insertCell(3);
+            var element4 = document.createElement("input");
+            element4.type = "text";
+            element4.name = "composition_" + (rowCount - 1);
+            element4.id = "composition";
+            element4.size = 50;
+            element4.readOnly = true;
+            cell4.appendChild(element4);
+
+            var cell5 = row.insertCell(4);
+            var element5 = document.createElement("input");
+            element5.type = "number";
+            element5.name = "pricePerItem_" + (rowCount - 1);
+            element5.id = "pricePerItem";
+            element5.value = 0;
+            element5.readOnly = true;
+            cell5.appendChild(element5);
+
+            var cell6 = row.insertCell(5);
+            var element6 = document.createElement("input");
+            element6.type = "number";
+            element6.name = "qtyAvailable_" + (rowCount - 1);
+            element6.id = "qtyAvailable";
+            element6.readOnly = true;
+            cell6.appendChild(element6);
+
+            var cell7 = row.insertCell(6);
+            var element7 = document.createElement("input");
+            element7.type = "number";
+            element7.name = "qtyRequired_" + (rowCount - 1);;
+            element7.id = "qtyRequired";
+            element7.value = 0;
+            element7.onchange = function() {
+                OnChangeOfQtyRequired(this)
+            };
+            element7.required = true;
+            cell7.appendChild(element7);
+
+            var cell8 = row.insertCell(7);
+            var element8 = document.createElement("input");
+            element8.type = "number";
+            element8.name = "price_" + (rowCount - 1);
+            element8.id = "price";
+            element8.readOnly = true;
+            cell8.appendChild(element8);
+        }
+
+        function deleteRow(tableId) {
+            try {
+                var table = document.getElementById(tableId);
+                var rowCount = table.rows.length;
+                var checkedRowCount = 0;
+
+                if (rowCount == 2) {
+                    alert("First row can't be deleted");
+                } else {
+                    for (var i = 0; i < rowCount; i++) {
+                        var row = table.rows[i];
+                        var chkbox = row.cells[0].childNodes[0];
+                        if (null != chkbox && true == chkbox.checked) {
+                            table.deleteRow(i);
+                            rowCount--;
+                            i--;
+                            checkedRowCount++;
+                            calculateBill("dataTable");
+                        }
+                    }
+                    if (checkedRowCount == 0) {
+                        throw "Please select a checkbox to delete";
+                    }
+                }
+            } catch (e) {
+                alert(e);
+            }
+        }
+
+        // Srikanth to fill: whole of this function is not implemented. Only pseudocode is written below.
+        function search(mysmiley) {
+            // sObject = get the current row's dropDown list object
+            // selection = get the value of sObject
+            // if selection = "-Select Item-" alert ("There is no item selected for finding equivalent medicine")
+            var table = document.getElementById('dataTable');
+            //var rowCount = table.rows.length;
+            var cellChildrenCount = mysmiley.parentElement.childNodes.length;
+            if (cellChildrenCount == 7) {
+                var sObject = mysmiley.parentElement.childNodes[3];
+            } else {
+                var sObject = mysmiley.parentElement.childNodes[0];
+            }
+            var sItem = sObject.value;
+            if (sItem.startsWith("-Select Item-")) {
+                alert('There is no item selected for finding equivalent medicine');
+                sObject.focus();
+                return -1;
+            }
+
+            // find number of words in chemical composition of selected item
+            var words = sItem.split("||");
+            var sName = words[0];
+            var sComposition = words[2].split(" ");
+            var wlength = sComposition.length;
+
+            // for each word repeat below steps (word)
+            //        lines[] += each item, chemical comp, price, qtyAvailable if "word" is contained within "chemical comp"
+            var stringToDisplay = null;
+            //var firstSelectItem = document.getElementById("itemlist_1");
+            var itemCount = sObject.options.length;
+            var i, j, optionElement, cComposition;
+            var equivalentCount = 0;
+
+            //sComposition.forEach(checkWord);
+
+            // display list of lines in different lines through a confirm window
+            for (i = 0; i < sComposition.length; i++) {
+                for (j = 1; j < itemCount; j++) {
+                    optionElement = sObject.options[j].value;
+                    cItem = optionElement.split("||")[0];
+                    cComposition = optionElement.split("||")[2];
+                    if (cItem != sItem.split("||")[0]) {
+                        if (cComposition.includes(sComposition[i])) {
+                            equivalentCount++;
+                            if (equivalentCount == 1)
+                                stringToDisplay = equivalentCount + ":" + cItem + ":" + cComposition + ":";
+                            else
+                                stringToDisplay += "\n" + equivalentCount + ":" + cItem + ":" + cComposition + ":";
+                        }
+                    }
+                }
+            }
+
+            // depending on the number of the item choosen from confirm window, change the selection in sObject
+            if (equivalentCount == 0) {
+                alert('No equivalent item found');
+            } else {
+                selectedValue = prompt(stringToDisplay);
+                //If cancel button is pressed or irrelevant value is entered in prompt window then don't change the item name 
+                if (selectedValue >= 1 && selectedValue <= equivalentCount) {
+                    var myArray = stringToDisplay.split(":");
+                    var chosenItem = myArray[3 * (selectedValue - 1) + 1];
+
+                    for (j = 0; j < itemCount; j++) {
+                        optionElement = sObject.options[j].value;
+                        cItem = optionElement.split("||")[0];
+                        if (cItem == chosenItem) {
+                            sObject.selectedIndex = j;
+                            break;
+                        }
+                    }
+                    // set corresponding chemical composition, price, qtyAvailable, pricePerUnit etc in that row
+                    var selectedValue = sObject.value;
+                    currentRow = sObject.parentElement.parentElement;
+                    selectedValue.split("||").forEach(fillFields);
+                }
+            }
+        }
+
+        // When a particular item is selected, fill the corresponding values in to all the other fields in same row.
+        function itemSelection(obj) {
+            var selectedValue = obj.value;
+            currentRow = obj.parentElement.parentElement;
+            selectedValue.split("||").forEach(fillFields);
+        }
+
+        function fillFields(item, inputCount) {
+
+            if (inputCount == 1) {
+                //document.getElementById("company").value = item;
+                currentRow.cells[2].childNodes[0].value = item;
+                //alert("This is the current Row from FillFields: " + cell);
+            } else if (inputCount == 2) {
+                //document.getElementById("composition").value = item;
+                currentRow.cells[3].childNodes[0].value = item;
+            } else if (inputCount == 3) {
+                //document.getElementById("pricePerItem").value = item;
+                currentRow.cells[4].childNodes[0].value = item;
+
+                var qty = parseFloat(currentRow.cells[6].childNodes[0].value);
+                currentRow.cells[7].childNodes[0].value = (qty * item).toFixed(2);
+                calculateBill("dataTable");
+            } else if (inputCount == 5) {
+                //document.getElementById("qtyAvailable").value = item;
+                currentRow.cells[5].childNodes[0].value = item;
+            } else {
+                // for itemCount == 0 and 5, There is no action required
+            }
+        }
+
+        // When required quantity is specified, calculate the price for that item and fill it in last column.
+        function OnChangeOfQtyRequired(obj) {
+            var qtyRequired = obj.value;
+            //alert("From focusOut : " + qty);
+            if (qtyRequired < 1 || qtyRequired > 200) {
+                alert('Please make sure that the required quantity lies in between 1 and 200');
+                obj.focus();
+            } else {
+                currentRow = obj.parentElement.parentElement;
+                pricePerUnit = parseFloat(currentRow.cells[4].childNodes[0].value);
+                currentRow.cells[7].childNodes[0].value = (qtyRequired * pricePerUnit).toFixed(2);
+
+                calculateBill("dataTable");
+            }
+        }
+
+        // Calculate the bill amount
+        function calculateBill(tableId) {
+            var table = document.getElementById(tableId);
+            var rowCount = table.rows.length;
+            var subTotal = 0.00;
+
+            //alert("Table row Count = " + rowCount);
+            for (var j = 1; j < rowCount; j++) {
+                subTotal += parseFloat(table.rows[j].cells[7].childNodes[0].value);
+            }
+            //alert("subTotal = " + subTotal );
+
+            var discount = 0.10 * subTotal;
+            //alert("Discount = " + discount );
+
+            var tax = 0.08 * (subTotal - discount);
+            //alert("Tax = " + tax );
+
+            var grandTotal = subTotal - discount + tax;
+            //alert("grandTotal = " + grandTotal );
+
+            document.getElementById("subTotal").value = subTotal.toFixed(2);
+            //alert(document.getElementById("subTotal").value + ":" + document.getElementById("subTotal"));
+            document.getElementById("discount").value = discount.toFixed(2);
+            document.getElementById("tax").value = tax.toFixed(2);
+            document.getElementById("grandTotal").value = Math.ceil(grandTotal);
+        }
+
+        // Validate the entire data, Store the bill data in DB and then Print the total bill
+        // Srikanth to fill: whole of this function is not implemented. Only pseudocode is written below.
+        function printBill() {
+            //alert("Validating the data on the bill " + tableID);
+            var table = document.getElementById('dataTable');
+            var rowCount = table.rows.length;
+            var i, j;
+
+            // 1. If Item name starts with "-Select Item-" that means, the item name is not selected. Give error and don't submit
+            var sObject, sName;
+            for (i = 1; i < rowCount; i++) {
+                if (i == 1) {
+                    sObject = table.rows[i].cells[1].childNodes[1];
+                } else {
+                    sObject = table.rows[i].cells[1].childNodes[0];
+                }
+
+                sName = sObject.options[sObject.selectedIndex].value;
+                if (sName.startsWith("-Select Item-")) {
+                    alert("Please select an item in the dropdown box");
+                    sObject.focus();
+                    return false;
+                }
+            }
+
+            // 2. If duplicate Item names appear on the selected items (across rows), merge them
+            //    Means, sum their Qty required values, keep only the first one, and delete all duplicate rows
+            var row_deletion = 0;
+            for (i = 1; i < rowCount; i++) {
+                if (i == 1) {
+                    object1 = table.rows[i].cells[1].childNodes[1];
+                } else {
+                    object1 = table.rows[i].cells[1].childNodes[0];
+                }
+                name1 = object1.options[object1.selectedIndex].value;
+
+                for (j = i; j < rowCount; j++) {
+                    if (j == 1) {
+                        object2 = table.rows[j].cells[1].childNodes[1];
+                    } else {
+                        object2 = table.rows[j].cells[1].childNodes[0];
+                    }
+                    name2 = object2.options[object2.selectedIndex].value;
+
+                    var quantity;
+                    var destination;
+                    if ((object1 != object2) && (name1 == name2)) {
+                        quantity = parseInt(table.rows[i].cells[6].childNodes[0].value);
+                        destination = parseInt(table.rows[j].cells[6].childNodes[0].value);
+                        pricePerUnit = parseInt(table.rows[j].cells[4].childNodes[0].value);
+                        quantity += destination;
+                        price = pricePerUnit * quantity;
+                        table.rows[i].cells[6].childNodes[0].value = quantity;
+                        table.rows[i].cells[7].childNodes[0].value = price.toFixed(2);
+
+                        table.deleteRow(j);
+                        rowCount--;
+                        j--;
+                        row_deletion = 1;
+                    }
+                }
+
+                // 3. Validate Qty required to be within the range (1-200)
+                qtyRequired = parseInt(table.rows[i].cells[6].childNodes[0].value);
+                if (qtyRequired < 1 || qtyRequired > 200) {
+                    alert('Please make sure that the required quantity lies in between 1 and 200');
+                    table.rows[i].cells[6].childNodes[0].focus();
+                    return false;
+                }
+
+                // 4. Check if the Qty required is more than stockAvailable
+                stockAvailable = parseInt(table.rows[i].cells[5].childNodes[0].value);
+                if (qtyRequired > stockAvailable) {
+                    alert('Not enough stock');
+                    table.rows[i].cells[6].childNodes[0].focus();
+                    return false;
+                }
+
+                // 5. Price (last) column should not contain Blank or 0.00 value (except when currentRow="last row" and Item ~= "-Select Item-")
+                price = parseInt(table.rows[i].cells[7].childNodes[0].value);
+                if ((price == 0) || (isNaN(price))) {
+                    alert('Please check the quantity required and price per unit');
+                    table.rows[i].cells[6].childNodes[0].focus();
+                    return false;
+                }
+            }
+
+            element = document.getElementById('rowCount');
+            element.value = rowCount - 1;
+
+            //alert("rowCount = " + rowCount);
+            // If any of the rows got merged due to same item name selection, then the name of the elements
+            // need to be changed to set them in order. Otherwise, print bill in PDF doesn't work.
+            for (i = 1; i < rowCount; i++) {
+                if (i == 1) {
+                    table.rows[i].cells[1].childNodes[1].name = "itemName_" + (i - 1);
+                } else {
+                    table.rows[i].cells[1].childNodes[0].name = "itemName_" + (i - 1);
+                }
+                table.rows[i].cells[2].childNodes[0].name = "company_" + (i - 1);
+                table.rows[i].cells[3].childNodes[0].name = "composition_" + (i - 1);
+                table.rows[i].cells[4].childNodes[0].name = "pricePerItem_" + (i - 1);
+                table.rows[i].cells[5].childNodes[0].name = "qtyAvailable_" + (i - 1);
+                table.rows[i].cells[6].childNodes[0].name = "qtyRequired_" + (i - 1);
+                table.rows[i].cells[7].childNodes[0].name = "price_" + (i - 1);
+            }
+
+            return true;
+        }
+    </script>
+</head>
+
+<link rel="stylesheet" href="sales.css" type="text/css">
+<?php
+
+include 'db_connection.php';
+include 'display_titles.php';
+include 'List-of-Items.php';
+
+$loginId=$_GET["name"];
+
+?>
+
+
+    <body style="font-family: Fjalla One;">
+        <form onsubmit="return printBill();" action="Sale-of-Items_db_entry.php" method="POST">
+            <!--form onsubmit="if(!printBill('dataTable')){return false;}" action="Sale-of-Items_db_entry.php" method="POST"-->
+            <h1> Hospital Inventory Management System </h1>
+            <br>
+            <br>
+            <br>
+
+            <?php 
+					displaySalesMenu($loginId); 
+					echo "<br><br>"; 
+     		?>
+
+            <h3 style="text-align: center; margin: 30px; font-size: 25px; color: green;"> Sale Of Items </h3>
+
+            <label> Date : </label>
+            <script>
+                document.write(Date());
+            </script><br><br>
+            <label> Customer name: </label> <input type="text" name="customerName" placeholder="Customer name" size="30" required>
+            <label> Customer Phone: </label> <input type="tel" pattern="[0-9]{10}" name="customerPhone" placeholder="Customer Phone" size="13" required>
+            <label> Prescribed by: </label> <input type="text" name="doctorName" placeholder="Doctor name" size="30" required>
+            <br>
+            <br><br>
+
+            <table id="topTable" border="1">
+                <tr>
+                    <td>
+                        <table id="dataTable" border="1">
+
+                            <tr>
+                                <th> Select </th>
+                                <th> Item name </th>
+                                <th> Company name </th>
+                                <th> Chemical composition </th>
+                                <th> Price per unit </th>
+                                <th> Available stock </th>
+                                <th> Qty required </th>
+                                <th> Price </th>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <!--input type="checkbox" name="chk"/-->
+                                </td>
+                                <td>
+                                    <?php getItemsList(); ?>
+                                    <img src="Search.jpg" alt="Search" onclick="search(this);" height="20" width="42" align="bottom" float="right">
+                                </td>
+                                <td><input type="text" id="company" size="30" name="company_0" readonly> </td>
+                                <td><input type="text" id="composition" size="50" name="composition_0" readonly> </td>
+                                <td><input type="number" id="pricePerItem" name="pricePerItem_0" value="0" readonly> </td>
+                                <td><input type="number" id="qtyAvailable" name="qtyAvailable_0" readonly> </td>
+                                <td><input type="number" onchange="OnChangeOfQtyRequired(this);" id="qtyRequired" name="qtyRequired_0" value="0" required> </td>
+                                <td><input type="number" id="price" name="price" readonly> </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Sub Total : <input type="number" id="subTotal" name="subTotal" readonly>
+                        <br> Discount (10%) : <input type="number" id="discount" name="discount" readonly>
+                        <br> Tax (8%) : <input type="number" id="tax" name="tax" readonly>
+                        <br> Grand Total : <input type="number" id="grandTotal" name="grandTotal" readonly>
+                    </td>
+                </tr>
+            </table>
+
+            <br>
+            <input type="hidden" id="name" name="loginId" value="sales">
+            <input type="hidden" id="rowCount" name="rowCount" value="1">
+            <input type="button" class="buttons" value="Add Row" onclick="addRow('dataTable')">
+            <input type="button" class="buttons" value="Delete Row" onclick="deleteRow('dataTable')">
+            <input type="submit" class="buttons" value="Print">
+        </form>
+
+        <footer>
+            <ul>
+                <li><a href='#'><i class='fab fa-facebook-f' aria-hidden='true'> </i> </a> </li>
+                <li><a href='#'><i class='fab fa-twitter' aria hidden='true'> </i> </a> </li>
+                <li><a href='#'><i class='fab fa-instagram' aria-hidden='true'> </i> </a></li>
+                <li><a href='#'><i class='fab fa-linkedin-in' aria-hidden='true'> </i> </a></li>
+            </ul>
+        </footer>
+
+    </body>
+
+</html>
